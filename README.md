@@ -1,2 +1,2 @@
-+# consoleerp_client
- +WPF Web Client for ERPNext 
+consoleerp_client
+WPF Web Client for ERPNext 
