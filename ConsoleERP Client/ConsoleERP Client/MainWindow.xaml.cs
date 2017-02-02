@@ -6,6 +6,7 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -45,16 +46,61 @@ namespace ConsoleERP_Client
             }
         }
 
+        /// <summary>
+        /// Logs to log.txt
+        /// </summary>
+        /// <param name="lines"></param>
+        public static void Logger(String lines)
+        {
+
+            // Write the string to a file.append mode is enabled so that the log
+            // lines get appended to  test.txt than wiping content and writing the log
+
+            using (System.IO.StreamWriter file = new System.IO.StreamWriter("log.txt", true)) 
+                file.WriteLine(lines);            
+
+        }
+
+
         private void AddTab()
         {
             // make a new Tab for the browser
             TabItem item = new TabItem() { Header = "ERP" };
 
+            Grid panel = new Grid();            
+            ProgressBar pb = new ProgressBar() { };
+
             // the webbrowser to host the page
             ChromiumWebBrowser wbrowser = new ChromiumWebBrowser();
-            wbrowser.TitleChanged += (o, f) => { item.Header = wbrowser.Title; };
-            wbrowser.Address = HomeAddress;
-            item.Content = wbrowser;
+            wbrowser.TitleChanged += (o, f) => 
+            {
+                item.Header = wbrowser.Title;
+                EvaluateForwardBackward();
+            };
+            wbrowser.LoadingStateChanged += (o, e) => {                
+                Dispatcher.Invoke(async () =>
+                {
+                    await Task.Delay(200);
+                    pb.IsIndeterminate = wbrowser.IsLoading;
+                    EvaluateForwardBackward();
+                });                
+            };
+            if (tabControl.Items.Count == 0)
+                wbrowser.Address = HomeAddress;
+            else
+                wbrowser.Address = HomeAddress + "/desk";
+
+            RowDefinition r1 = new RowDefinition();
+            RowDefinition r2 = new RowDefinition() { Height = new GridLength(10) };
+            panel.RowDefinitions.Add(r1);
+            panel.RowDefinitions.Add(r2);
+
+            Grid.SetRow(panel, 0); Grid.SetRow(pb, 1);
+
+            panel.Children.Add(wbrowser);
+            panel.Children.Add(pb);
+
+            item.Content = panel;
 
             tabControl.Items.Add(item);
         }
@@ -79,7 +125,7 @@ namespace ConsoleERP_Client
         {
             if (tabControl.SelectedIndex != -1)
             {
-                ChromiumWebBrowser wbrowser = ((TabItem)tabControl.SelectedItem).Content as ChromiumWebBrowser;
+                ChromiumWebBrowser wbrowser = getActiveTabBrowser();
                 wbrowser.Dispose();
 
                 tabControl.Items.Remove(tabControl.SelectedItem);
@@ -95,7 +141,7 @@ namespace ConsoleERP_Client
         {
             foreach (TabItem t in tabControl.Items)
             {
-                ((ChromiumWebBrowser)t.Content).Dispose();
+                getActiveTabBrowser(t).Dispose();
             }
         }
 
@@ -104,8 +150,55 @@ namespace ConsoleERP_Client
             if (tabControl.SelectedItem == null) return;
 
 
-            ChromiumWebBrowser wbrowser = ((ChromiumWebBrowser)(tabControl.SelectedItem as TabItem).Content);
+            ChromiumWebBrowser wbrowser = getActiveTabBrowser();
             wbrowser.Load(wbrowser.Address);
+        }
+
+        /// <summary>
+        /// Handles forward and backward
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void navigate_tofo(object sender, RoutedEventArgs e)
+        {
+            CefSharp.IBrowser wbrowser = getActiveTabBrowser().GetBrowser();
+
+            if (sender == nav_back && wbrowser.CanGoBack)
+                wbrowser.GoBack();
+            else if (sender == nav_for && wbrowser.CanGoForward)
+                wbrowser.GoForward();
+        }
+
+        private void EvaluateForwardBackward()
+        {
+            ChromiumWebBrowser wbrowser = getActiveTabBrowser();
+            if (wbrowser == null)
+            {
+                nav_back.IsEnabled = false;
+                nav_for.IsEnabled = false;
+                return;
+            }
+
+            nav_back.IsEnabled = wbrowser.CanGoBack;
+            nav_for.IsEnabled = wbrowser.CanGoForward;
+        }
+
+        /// <summary>
+        /// Gets te ChromiumWebBrowser for active tab
+        /// </summary>
+        /// <param name="t">Specify to get browser from particular tab</param>
+        /// <returns></returns>
+        private ChromiumWebBrowser getActiveTabBrowser(TabItem t = null)
+        {
+            if (tabControl.SelectedItem == null)
+                return null;
+                     
+            return ((Grid)(t ?? tabControl.SelectedItem as TabItem).Content).Children[0] as ChromiumWebBrowser;
+        }
+
+        private void tabControl_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            EvaluateForwardBackward();
         }
     }
 

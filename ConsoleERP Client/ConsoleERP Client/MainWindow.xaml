@@ -5,19 +5,22 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:ConsoleERP_Client"
         mc:Ignorable="d"
-        Title="Console ERP Client" Height="350" Width="525" WindowState="Maximized" Closing="Window_Closing">
+        Title="Console ERP Client" Height="350" Width="600" WindowState="Maximized" Closing="Window_Closing">
     <Grid>
 
-        <TabControl x:Name="tabControl" Margin="0,20,0,0"/>
+        <TabControl x:Name="tabControl" Margin="0,45,0,0" SelectionChanged="tabControl_SelectionChanged"/>
 
         <StackPanel HorizontalAlignment="Center" VerticalAlignment="Top" Orientation="Horizontal">
-            <Button x:Name="nav_back" HorizontalAlignment="Left" VerticalAlignment="Top" Content="&lt;" Width="20"/>
-            <Button x:Name="nav_refresh" HorizontalAlignment="Left" VerticalAlignment="Top" Content="R" Width="20" Click="nav_refresh_Click"/>
-            <Button x:Name="nav_for" HorizontalAlignment="Left" VerticalAlignment="Top" Content="&gt;" Width="20"/>
+            <Button x:Name="nav_back" HorizontalAlignment="Left" VerticalAlignment="Top" Content="Back" Width="70" Click="navigate_tofo" Margin="0,0,5,0"/>
+            <Button x:Name="nav_refresh" HorizontalAlignment="Left" VerticalAlignment="Top" Content="Reload" Width="70" Click="nav_refresh_Click"/>
+            <Button x:Name="nav_for" HorizontalAlignment="Left" VerticalAlignment="Top" Content="Forward" Width="70" Click="navigate_tofo" Margin="5,0,0,0"/>
         </StackPanel>
-        <!--add tab-->
-        <Button x:Name="addTabButton" HorizontalAlignment="Right" VerticalAlignment="Top" Height="20" Width="80" Content="Add Tab" Margin="0" Click="add_tab_Click"/>
-        <!--close tab-->
-        <Button x:Name="closeButton" HorizontalAlignment="Right" VerticalAlignment="Top" Height="20" Width="80" Content="Close Tab" Margin="0,0,80,0" Click="close_tab_Click"/>
+
+        <StackPanel Orientation="Horizontal" VerticalAlignment="Top" HorizontalAlignment="Center" Margin="0,25,5,0">
+            <!--add tab-->
+            <Button x:Name="addTabButton" HorizontalAlignment="Right" VerticalAlignment="Top" Height="20" Width="80" Content="Add Tab" Margin="0,0,5,0" Click="add_tab_Click"/>
+            <!--close tab-->
+            <Button x:Name="closeButton" HorizontalAlignment="Right" VerticalAlignment="Top" Height="20" Width="80" Content="Close Tab" Margin="0,0,0,0" Click="close_tab_Click"/>
+        </StackPanel>
     </Grid>
 </Window>
