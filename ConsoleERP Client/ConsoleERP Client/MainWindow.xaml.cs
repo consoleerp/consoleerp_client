@@ -30,6 +30,7 @@ namespace ConsoleERP_Client
         public MainWindow()
         {
             InitializeComponent();
+            CefSharp.Cef.Initialize(new CefSharp.CefSettings() { CachePath = "cache" });
 
 
             // get address
@@ -57,7 +58,7 @@ namespace ConsoleERP_Client
             // lines get appended to  test.txt than wiping content and writing the log
 
             using (System.IO.StreamWriter file = new System.IO.StreamWriter("log.txt", true)) 
-                file.WriteLine(lines);            
+                file.WriteLine("\n\n" + lines);            
 
         }
 
@@ -72,9 +73,12 @@ namespace ConsoleERP_Client
 
             // the webbrowser to host the page
             ChromiumWebBrowser wbrowser = new ChromiumWebBrowser();
+            new CefFrappeLoginHandler(wbrowser, Dispatcher);
+            
+
             wbrowser.TitleChanged += (o, f) => 
             {
-                item.Header = wbrowser.Title;
+                item.Header = string.IsNullOrEmpty(wbrowser.Title) ? "Loading..." : wbrowser.Title;
                 EvaluateForwardBackward();
             };
             wbrowser.LoadingStateChanged += (o, e) => {                
@@ -103,6 +107,7 @@ namespace ConsoleERP_Client
             item.Content = panel;
 
             tabControl.Items.Add(item);
+            tabControl.SelectedItem = item;
         }
 
         /// <summary>
